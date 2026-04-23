@@ -1,52 +1,35 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
-use Illuminate\Http\Request;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 
-class AuthController extends Controller
-{
+class AuthController extends Controller {
     protected $authService;
 
-    public function __construct(AuthService $authService)
-    {
+    public function __construct(AuthService $authService) {
         $this->authService = $authService;
     }
-
-    public function register(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed'
-        ]);
-
-        $user = $this->authService->register($data);
-
+    public function register(RegisterRequest $request) {
+        $user = $this->authService->register($request->validated());
         return response()->json(['message' => 'Đăng ký thành công!', 'user' => $user], 201);
     }
+    public function login(LoginRequest $request) {
+        $result = $this->authService->login($request->validated());
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        if ($result['status'] === 'email_not_found') 
+            return response()->json(['message' => 'Email không tồn tại.'], 404);
+        
+        if ($result['status'] === 'password_incorrect') 
+            return response()->json(['message' => 'Mật khẩu sai.'], 401);
+
+        return response()->json([
+            'message' => 'Đăng nhập thành công!',
+            'token'   => $result['token'],
+            'user'    => $result['user']
         ]);
-
-        try {
-            $result = $this->authService->login($request->only('email', 'password'));
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Đăng nhập thành công',
-                'data' => $result
-            ], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Email hoặc mật khẩu không chính xác.'
-            ], 422);
-        }
     }
 }

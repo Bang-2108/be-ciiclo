@@ -12,22 +12,19 @@ class AuthService extends BaseService
     {
         parent::__construct($userRepo);
     }
-
     public function register(array $data)
     {
-        $data['password'] = Hash::make($data['password']); 
         return $this->repository->create($data);
     }
-
     public function login(array $data)
     {
         $user = $this->repository->findByEmail($data['email']);
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Thông tin đăng nhập không chính xác.'],
-            ]);
+        if (!$user) return ['status' => 'email_not_found'];
+        if (!Hash::check($data['password'], $user->password)) {
+            return ['status' => 'password_incorrect'];
         }
         return [
+            'status' => 'success',
             'user' => $user,
             'token' => $user->createToken('auth_token')->plainTextToken
         ];

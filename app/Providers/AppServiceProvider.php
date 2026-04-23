@@ -3,21 +3,22 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\User;
+use App\Repositories\UserRepository;
+use App\Services\AuthService;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
+       public function register(): void
     {
-        $this->app->singleton(\App\Repositories\UserRepository::class);
-        $this->app->singleton(\App\Services\AuthService::class);
-    }
+        $this->app->singleton(UserRepository::class, function ($app) {
+            return new UserRepository(new User());
+        });
 
-    /**
-     * Bootstrap any application services.
-     */
+        $this->app->singleton(AuthService::class, function ($app) {
+            return new AuthService($app->make(UserRepository::class));
+        });
+    }
     public function boot(): void
     {
         //
