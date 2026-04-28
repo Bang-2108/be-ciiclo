@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y libpng-dev libzip-dev zip unzip git
 RUN docker-php-ext-install pdo_mysql pdo_mysql gd zip
