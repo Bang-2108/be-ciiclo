@@ -1,12 +1,9 @@
 FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libzip-dev \
-    libpq-dev \
-    zip \
-    unzip \
-    git
+    libpng-dev libzip-dev libpq-dev zip unzip git \
+    curl gnupg && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
 RUN docker-php-ext-install pdo_mysql pdo_pgsql gd zip
 
@@ -16,9 +13,9 @@ COPY . /var/www/html
 WORKDIR /var/www/html
 
 RUN composer install --no-dev --optimize-autoloader
+RUN npm install && npm run build
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
 
