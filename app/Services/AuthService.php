@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthService extends BaseService
 {
@@ -14,6 +13,9 @@ class AuthService extends BaseService
     }
     public function register(array $data)
     {
+        $data['password'] = Hash::make($data['password']);
+        unset($data['password_confirmation']);
+
         return $this->repository->create($data);
     }
     public function login(array $data)
@@ -23,6 +25,7 @@ class AuthService extends BaseService
         if (!Hash::check($data['password'], $user->password)) {
             return ['status' => 'password_incorrect'];
         }
+
         return [
             'status' => 'success',
             'user' => $user,
