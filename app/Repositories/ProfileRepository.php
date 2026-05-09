@@ -17,7 +17,6 @@ class ProfileRepository extends BaseRepository
             'socials',
             'badges'
         ])
-        ->where('user_id', Auth::id()) 
         ->first();
     }
 }
