@@ -13,10 +13,14 @@ class ProfileController extends Controller
 
     public function index()
     {
-        return response()->json([
-            'success' => true,
-
-            'data' => $this->profileService->getProfile()
-        ]);
+        try {
+            $profile = $this->profileService->getProfile();
+            if (!$profile) {
+                return $this->error("Không tìm thấy thông tin cá nhân", 404);
+            }
+            return $this->success($profile, "Lấy profile thành công");
+        } catch (\Exception $e) {
+            return $this->error("Lỗi hệ thống", 500);
+        }
     }
 }
