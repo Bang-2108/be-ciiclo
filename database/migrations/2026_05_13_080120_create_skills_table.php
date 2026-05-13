@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('profiles', function (Blueprint $table) {
-          $table->id();
-
+        Schema::create('skills', function (Blueprint $table) {
+           $table->id();
+            $table->foreignId('profile_id')->constrained()->onDelete('cascade');
             $table->string('name');
-
-            $table->string('role');
-
-            $table->text('description');
-
-            $table->string('avatar');
-
+            $table->integer('percentage');
+            $table->string('category');
+            $table->boolean('is_featured')->default(false);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('profiles');
+        Schema::dropIfExists('skills');
     }
 };

@@ -4,71 +4,57 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-    protected $authService;
+    protected AuthService $authService;
 
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
     }
-
-    public function register(RegisterRequest $request)
+    public function login(LoginRequest $request): JsonResponse
     {
         try {
-            $user = $this->authService->register(
-                $request->validated()
-            );
+            $result = $this->authService->login($request->validated());
 
-            return $this->success(
-                $user,
-                'Đăng ký tài khoản thành công!',
-                201
-            );
-        } catch (\Exception $e) {
+            return match ($result['status']) {
+                'email_not_found' => $this->error(
+                    'Email không tồn tại.',
+                    404
+                ),
+                'password_incorrect' => $this->error(
+                    'Mật khẩu sai.',
+                    401
+                ),
+                default => $this->success(
+                    [
+                        'token' => $result['token'],
+                        'user'  => $result['user'],
+                    ],
+                    'Đăng nhập thành công!'
+                )
+            };
+        } catch (\Throwable $e) {
             return $this->error(
-                $e->getMessage(),
+                'Đã có lỗi xảy ra trong quá trình đăng nhập.',
                 500
             );
         }
     }
-
-    public function login(LoginRequest $request)
+    public function logout(Request $request): JsonResponse
     {
         try {
-            $result = $this->authService->login(
-                $request->validated()
-            );
-
-            if ($result['status'] === 'email_not_found') {
-                return $this->error(
-                    'Email không tồn tại.',
-                    404
-                );
+            if ($request->user()) {
+                $request->user()->currentAccessToken()->delete();
+                return $this->success(null, 'Đăng xuất thành công!');
             }
-
-            if ($result['status'] === 'password_incorrect') {
-                return $this->error(
-                    'Mật khẩu sai.',
-                    401
-                );
-            }
-
-            return $this->success(
-                [
-                    'token' => $result['token'],
-                    'user'  => $result['user'],
-                ],
-                'Đăng nhập thành công!'
-            );
-        } catch (\Exception $e) {
-            return $this->error(
-                $e->getMessage(),
-                500
-            );
+            return $this->error('Không tìm thấy phiên làm việc hợp lệ.', 401);
+        } catch (\Throwable $e) {
+            return $this->error('Lỗi hệ thống khi đăng xuất.', 500);
         }
     }
 }
