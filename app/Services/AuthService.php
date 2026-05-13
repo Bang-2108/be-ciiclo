@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AuthService extends BaseService
 {
@@ -13,29 +14,7 @@ class AuthService extends BaseService
         parent::__construct($userRepo);
     }
 
-    public function register(array $data)
-    {
-        try {
-            $data['password'] = Hash::make(
-                $data['password']
-            );
-
-            unset($data['password_confirmation']);
-
-            return $this->repository->create($data);
-        } catch (\Exception $e) {
-            Log::error(
-                'Register Error: ' .
-                    $e->getMessage()
-            );
-
-            throw new \Exception(
-                'Không thể tạo tài khoản, vui lòng thử lại sau.'
-            );
-        }
-    }
-
-    public function login(array $data)
+    public function login(array $data): array
     {
         try {
             $user = $this->repository->findByEmail(
@@ -68,15 +47,16 @@ class AuthService extends BaseService
 
                 'user' => $user,
             ];
-        } catch (\Exception $e) {
-            Log::error(
-                'Login Error: ' .
-                    $e->getMessage()
-            );
 
-            throw new \Exception(
-                'Có lỗi hệ thống xảy ra trong quá trình đăng nhập.'
-            );
+        } catch (Throwable $e) {
+
+            Log::error('Login Error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+
+            throw $e;
         }
     }
 }
