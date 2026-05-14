@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Profile;
-use App\Models\ProfileSocial;
-use App\Models\ProfileBadge;
+use App\Models\Social; // Sử dụng Model Social bạn đã định nghĩa
 
 class ProfileSeeder extends Seeder
 {
@@ -15,57 +13,35 @@ class ProfileSeeder extends Seeder
      */
     public function run(): void
     {
-        $profile = Profile::create([
-            'name' => 'Zoan Thi Bang',
-
-            'role' => 'Full Stack Developer',
-
-            'description' =>
-                'I am a final-year Software Engineering student. Currently, I focus on building high-quality web applications with modern frameworks.',
-
-            'avatar' =>
-                'http://127.0.0.1:9000/ciiclo-storage/hero/b5.jpg'
-        ]);
-
-        ProfileSocial::insert([
+        $profile = Profile::updateOrCreate(
+            ['id' => 1], 
             [
-                'profile_id' => $profile->id,
-
-                'platform' => 'Github',
-
-                'icon' => 'bi-github',
-
-                'url' => '#'
-            ],
-            [
-                'profile_id' => $profile->id,
-
-                'platform' => 'LinkedIn',
-
-                'icon' => 'bi-linkedin',
-
-                'url' => '#'
+                'name' => 'Zoan Thi Bang',
+                'role' => 'Full Stack Developer',
+                'bio'  => 'I am a final-year Software Engineering student. Currently, I focus on building high-quality web applications with modern frameworks.',
+                'education' => 'Software Engineering - Passerelles Numériques Vietnam',
+                'objective' => 'Becoming a professional Senior Developer.',
+                'avatar'    => 'http://127.0.0.1:9000/ciiclo-storage/hero/b5.jpg',
+                'is_available' => true,
+                'stats_experience'  => 1,
+                'stats_projects'    => 5,
+                'stats_internships' => 1,
             ]
-        ]);
-
-        ProfileBadge::insert([
+        );
+        $profile->socials()->delete();
+        
+        $profile->socials()->createMany([
             [
-                'profile_id' => $profile->id,
-
-                'label' => 'Design',
-
-                'icon' => 'bi-palette',
-
-                'position' => 'design'
+                'platform' => 'Github',
+                'icon'     => 'bi-github',
+                'url'      => 'https://github.com/zoanthibang',
+                'sort_order' => 1
             ],
             [
-                'profile_id' => $profile->id,
-
-                'label' => 'Code',
-
-                'icon' => 'bi-code-slash',
-
-                'position' => 'code'
+                'platform' => 'LinkedIn',
+                'icon'     => 'bi-linkedin',
+                'url'      => 'https://linkedin.com/in/zoanthibang',
+                'sort_order' => 2
             ]
         ]);
     }
