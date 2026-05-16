@@ -4,8 +4,15 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\User;
+use App\Models\Profile;
+use App\Models\Skill;
 use App\Repositories\UserRepository;
+use App\Repositories\ProfileRepository;
+use App\Repositories\SkillRepository;
 use App\Services\AuthService;
+use App\Services\ProfileService;
+use App\Services\SkillService;
+use App\Services\StorageService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,18 +25,28 @@ class AppServiceProvider extends ServiceProvider
             return new AuthService($app->make(UserRepository::class));
         });
 
-        $this->app->singleton(\App\Repositories\ProfileRepository::class, function ($app) {
-            return new \App\Repositories\ProfileRepository(new \App\Models\Profile());
+        $this->app->singleton(SkillRepository::class, function ($app) {
+            return new SkillRepository(new Skill());
         });
-        $this->app->singleton(\App\Services\ProfileService::class, function ($app) {
-            return new \App\Services\ProfileService($app->make(\App\Repositories\ProfileRepository::class));
+        $this->app->singleton(SkillService::class, function ($app) {
+            return new SkillService(
+                $app->make(SkillRepository::class),
+                $app->make(ProfileRepository::class)
+            );
         });
 
-        $this->app->singleton(\App\Repositories\SkillRepository::class, function ($app) {
-            return new \App\Repositories\SkillRepository(new \App\Models\Skill());
+         $this->app->singleton(ProfileRepository::class, function ($app) {
+            return new ProfileRepository(new Profile());
         });
-        $this->app->singleton(\App\Services\SkillService::class, function ($app) {
-            return new \App\Services\SkillService($app->make(\App\Repositories\SkillRepository::class));
+        $this->app->singleton(ProfileService::class, function ($app) {
+            return new ProfileService(
+                $app->make(ProfileRepository::class),
+                $app->make(StorageService::class) 
+            );
+        });
+
+        $this->app->singleton(StorageService::class, function ($app) {
+            return new StorageService();
         });
     }
     public function boot(): void

@@ -23,11 +23,11 @@ class AuthController extends Controller
 
             return match ($result['status']) {
                 'email_not_found' => $this->error(
-                    'Email không tồn tại.',
+                    'Email does not exist.',
                     404
                 ),
                 'password_incorrect' => $this->error(
-                    'Mật khẩu sai.',
+                    'Incorrect password.',
                     401
                 ),
                 default => $this->success(
@@ -35,12 +35,12 @@ class AuthController extends Controller
                         'token' => $result['token'],
                         'user'  => $result['user'],
                     ],
-                    'Đăng nhập thành công!'
+                    'Login successful!'
                 )
             };
         } catch (\Throwable $e) {
             return $this->error(
-                'Đã có lỗi xảy ra trong quá trình đăng nhập.',
+                'An error occurred during login.',
                 500
             );
         }
@@ -50,11 +50,11 @@ class AuthController extends Controller
         try {
             if ($request->user()) {
                 $request->user()->currentAccessToken()->delete();
-                return $this->success(null, 'Đăng xuất thành công!');
+                return $this->success(null, 'Logout successful!');
             }
-            return $this->error('Không tìm thấy phiên làm việc hợp lệ.', 401);
+            return $this->error('No valid session found.', 401);
         } catch (\Throwable $e) {
-            return $this->error('Lỗi hệ thống khi đăng xuất.', 500);
+            return $this->error('An error occurred during logout.', 500);
         }
     }
 }

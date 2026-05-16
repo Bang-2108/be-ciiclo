@@ -15,7 +15,6 @@ class ProfileRepository extends BaseRepository
     {
         return $this->model->with([
             'socials',
-            'badges'
         ])
         ->first();
     }

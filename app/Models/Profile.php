@@ -20,6 +20,8 @@ class Profile extends Model
         'stats_projects',
         'stats_internships',
     ];
+
+    
     public function skills(): HasMany
     {
         return $this->hasMany(Skill::class);
