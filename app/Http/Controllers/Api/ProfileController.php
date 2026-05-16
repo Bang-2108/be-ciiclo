@@ -4,23 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\ProfileService;
+use Illuminate\Http\JsonResponse;
 
 class ProfileController extends Controller
 {
-    public function __construct(
-        protected ProfileService $profileService
-    ) {}
+    public function __construct(protected ProfileService $profileService) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
-        try {
-            $profile = $this->profileService->getProfile();
-            if (!$profile) {
-                return $this->error("Không tìm thấy thông tin cá nhân", 404);
-            }
-            return $this->success($profile, "Lấy profile thành công");
-        } catch (\Exception $e) {
-            return $this->error("Lỗi hệ thống", 500);
-        }
+        return $this->success(
+            $this->profileService->getProfile(),
+             "Profile information retrieved successfully"
+        );
     }
 }

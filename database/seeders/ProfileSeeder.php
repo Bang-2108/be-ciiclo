@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Profile;
-use App\Models\Social; // Sử dụng Model Social bạn đã định nghĩa
+use App\Models\Social; 
 
 class ProfileSeeder extends Seeder
 {

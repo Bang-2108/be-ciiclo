@@ -18,7 +18,7 @@ class SkillController extends Controller
 
         return $this->success(
             $skills,
-            'Lấy danh sách kỹ năng thành công'
+            'Skills retrieved successfully'
         );
     }
 }
