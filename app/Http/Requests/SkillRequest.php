@@ -23,9 +23,9 @@ class SkillRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category.in' => 'Danh mục không hợp lệ (frontend, backend, database, tools).',
-            'percentage.min' => 'Phần trăm không được nhỏ hơn 0.',
-            'percentage.max' => 'Phần trăm không được lớn hơn 100.',
+            'category.in' => 'Invalid category (frontend, backend, database, tools).',
+            'percentage.min' => 'Percentage cannot be less than 0.',
+            'percentage.max' => 'Percentage cannot be greater than 100.',
         ];
     }
 }

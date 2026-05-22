@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
@@ -48,13 +48,22 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            if ($request->user()) {
-                $request->user()->currentAccessToken()->delete();
-                return $this->success(null, 'Logout successful!');
+
+            $token = $request->user()?->currentAccessToken();
+
+            if ($token) {
+                $token->delete();
             }
-            return $this->error('No valid session found.', 401);
+            return $this->success(
+                null,
+                'Logout successful!'
+            );
         } catch (\Throwable $e) {
-            return $this->error('An error occurred during logout.', 500);
+
+            return $this->error(
+                'An error occurred during logout.',
+                500
+            );
         }
     }
 }

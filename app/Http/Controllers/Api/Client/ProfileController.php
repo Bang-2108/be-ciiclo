@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Client;
 
 use App\Http\Controllers\Controller;
 use App\Services\ProfileService;
@@ -9,7 +9,6 @@ use Illuminate\Http\JsonResponse;
 class ProfileController extends Controller
 {
     public function __construct(protected ProfileService $profileService) {}
-
     public function index(): JsonResponse
     {
         return $this->success(

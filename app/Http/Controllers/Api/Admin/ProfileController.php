@@ -16,7 +16,7 @@ class ProfileController extends Controller
     }
     public function update(ProfileRequest $request): JsonResponse
     {
-        $profile = $this->profileService->updateProfile($request->validated());
+        $profile = $this->profileService->updateProfile($request);
         return $this->success($profile, "Profile updated successfully");
     }
 }
