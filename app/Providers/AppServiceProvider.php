@@ -6,13 +6,17 @@ use Illuminate\Support\ServiceProvider;
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\Skill;
+use App\Models\Project;
 use App\Repositories\UserRepository;
 use App\Repositories\ProfileRepository;
 use App\Repositories\SkillRepository;
+use App\Repositories\ProjectRepository;
 use App\Services\AuthService;
 use App\Services\ProfileService;
 use App\Services\SkillService;
+use App\Services\ProjectService;
 use App\Services\StorageService;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,18 +39,30 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-         $this->app->singleton(ProfileRepository::class, function ($app) {
+        $this->app->singleton(ProfileRepository::class, function ($app) {
             return new ProfileRepository(new Profile());
         });
         $this->app->singleton(ProfileService::class, function ($app) {
             return new ProfileService(
                 $app->make(ProfileRepository::class),
-                $app->make(StorageService::class) 
+                $app->make(StorageService::class)
             );
         });
 
         $this->app->singleton(StorageService::class, function ($app) {
             return new StorageService();
+        });
+
+        $this->app->singleton(ProjectRepository::class, function ($app) {
+            return new ProjectRepository(new Project());
+        });
+
+        $this->app->singleton(ProjectService::class, function ($app) {
+            return new ProjectService(
+                $app->make(ProjectRepository::class),
+                $app->make(ProfileRepository::class),
+                $app->make(StorageService::class)
+            );
         });
     }
     public function boot(): void
