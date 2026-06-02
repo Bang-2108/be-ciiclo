@@ -16,18 +16,15 @@ class AuthController extends Controller
     {
         $this->authService = $authService;
     }
+
     public function login(LoginRequest $request): JsonResponse
     {
         try {
             $result = $this->authService->login($request->validated());
 
             return match ($result['status']) {
-                'email_not_found' => $this->error(
-                    'Email does not exist.',
-                    404
-                ),
-                'password_incorrect' => $this->error(
-                    'Incorrect password.',
+                'email_not_found', 'password_incorrect' => $this->error(
+                    'Invalid email or password.',
                     401
                 ),
                 default => $this->success(
@@ -45,10 +42,10 @@ class AuthController extends Controller
             );
         }
     }
+
     public function logout(Request $request): JsonResponse
     {
         try {
-
             $token = $request->user()?->currentAccessToken();
 
             if ($token) {
@@ -59,7 +56,6 @@ class AuthController extends Controller
                 'Logout successful!'
             );
         } catch (\Throwable $e) {
-
             return $this->error(
                 'An error occurred during logout.',
                 500

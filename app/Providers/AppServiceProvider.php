@@ -7,14 +7,17 @@ use App\Models\User;
 use App\Models\Profile;
 use App\Models\Skill;
 use App\Models\Project;
+use App\Models\Contact;
 use App\Repositories\UserRepository;
 use App\Repositories\ProfileRepository;
 use App\Repositories\SkillRepository;
 use App\Repositories\ProjectRepository;
+use App\Repositories\ContactRepository;
 use App\Services\AuthService;
 use App\Services\ProfileService;
 use App\Services\SkillService;
 use App\Services\ProjectService;
+use App\Services\ContactService;
 use App\Services\StorageService;
 
 
@@ -62,6 +65,14 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(ProjectRepository::class),
                 $app->make(ProfileRepository::class),
                 $app->make(StorageService::class)
+            );
+        });
+        $this->app->singleton(ContactRepository::class, function ($app) {
+            return new ContactRepository(new Contact());
+        });
+        $this->app->singleton(ContactService::class, function ($app) {
+            return new ContactService(
+                $app->make(ContactRepository::class)
             );
         });
     }
