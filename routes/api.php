@@ -8,14 +8,15 @@ use App\Http\Controllers\Api\Client\ProfileController as PublicProfileController
 use App\Http\Controllers\Api\Client\SkillController as PublicSkillController;
 use App\Http\Controllers\Api\Admin\ProjectController as AdminProjectController;
 use App\Http\Controllers\Api\Client\ProjectController as PublicProjectController;
-
-    
+use App\Http\Controllers\Api\Admin\ContactController as AdminContactController;
+use App\Http\Controllers\Api\Client\ContactController as PublicContactController;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('public')->group(function () {
         Route::get('/profile', [PublicProfileController::class, 'index']);
         Route::get('/skills', [PublicSkillController::class, 'index']);
-        Route::get('/projects', [PublicProjectController::class, 'index']);
+        Route::get('/projects', [PublicProjectController::class, 'index']); 
+        Route::post('/contact', [PublicContactController::class, 'store']);
     });
 
     Route::post('/login', [AuthController::class, 'login']);
@@ -31,7 +32,11 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/projects', [AdminProjectController::class, 'index']);
         Route::post('/projects', [AdminProjectController::class, 'store']);
-        Route::put('/projects/{id}', [AdminProjectController::class, 'update']);
+        Route::post('/projects/{id}', [AdminProjectController::class, 'update']);
         Route::delete('/projects/{id}', [AdminProjectController::class, 'destroy']);
+
+        Route::get('/contacts', [AdminContactController::class, 'index']);
+        Route::patch('/contacts/{id}/read', [AdminContactController::class, 'markAsRead']);
+        Route::delete('/contacts/{id}', [AdminContactController::class, 'destroy']);
     });
 });

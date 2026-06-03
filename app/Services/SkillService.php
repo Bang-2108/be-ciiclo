@@ -20,7 +20,7 @@ class SkillService extends BaseService
     {
         $profile = $this->profileRepo->getProfile();
         
-        $data['profile_id'] = $profile->id;
+        $data['profile_id'] = $profile ? $profile->id : 1;
         
         return $this->repository->create($data);
     }

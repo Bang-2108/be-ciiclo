@@ -34,7 +34,7 @@ class ProjectService extends BaseService
         $profile = $this->profileRepo->getProfile();
         $data['profile_id'] = $profile ? $profile->id : 1;
         if (isset($data['tech_stack'])) {
-            $data['tech_stack'] = array_map('trim', explode(',', $data['tech_stack']));
+            $data['tech_stack'] = array_filter(array_map('trim', explode(',', $data['tech_stack'])));
         }
         if ($imageFile && $imageFile->isValid()) {
             $data['image'] = $this->storageService->upload($imageFile, 'projects');
@@ -47,18 +47,13 @@ class ProjectService extends BaseService
 
         return $project;
     }
-    public function updateProject($id, array $data, ?UploadedFile $imageFile)
+    public function updateProject(int $id, array $data, ?UploadedFile $imageFile)
     {
         $project = $this->repository->find($id);
         $rawOldImage = $project ? $project->getRawOriginal('image') : null;
 
-        if ($rawOldImage && str_contains($rawOldImage, 'http')) {
-            $rawOldImage = ltrim(parse_url($rawOldImage, PHP_URL_PATH), '/');
-            $rawOldImage = str_replace(config('filesystems.disks.s3.bucket') . '/', '', $rawOldImage);
-        }
-
         if (isset($data['tech_stack'])) {
-            $data['tech_stack'] = array_map('trim', explode(',', $data['tech_stack']));
+            $data['tech_stack'] = array_filter(array_map('trim', explode(',', $data['tech_stack'])));
         }
 
         if ($imageFile && $imageFile->isValid()) {
@@ -78,7 +73,8 @@ class ProjectService extends BaseService
 
         return $updatedProject;
     }
-    public function deleteProject($id)
+
+    public function deleteProject(int $id)
     {
         $project = $this->repository->find($id);
         $rawImage = $project ? $project->getRawOriginal('image') : null;
