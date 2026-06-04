@@ -23,7 +23,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AdminProfileController::class, 'show']);
-        Route::post('/profile', [AdminProfileController::class, 'update']);
+        Route::put('/profile', [AdminProfileController::class, 'update']);
 
         Route::get('/skills', [AdminSkillController::class, 'index']);      
         Route::post('/skills', [AdminSkillController::class, 'store']);    
@@ -32,7 +32,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/projects', [AdminProjectController::class, 'index']);
         Route::post('/projects', [AdminProjectController::class, 'store']);
-        Route::post('/projects/{id}', [AdminProjectController::class, 'update']);
+        Route::put('/projects/{id}', [AdminProjectController::class, 'update']);
         Route::delete('/projects/{id}', [AdminProjectController::class, 'destroy']);
 
         Route::get('/contacts', [AdminContactController::class, 'index']);

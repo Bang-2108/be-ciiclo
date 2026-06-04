@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Client;
 use App\Http\Controllers\Controller;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
@@ -21,10 +22,10 @@ class ProjectController extends Controller
                 'Client projects retrieved successfully'
             );
         } catch (\Exception $e) {
+            Log::error('Client Project Index Error: ' . $e->getMessage());
             return $this->error(
                 'Internal server error',
-                500,
-                $e->getMessage()
+                500
             );
         }
     }

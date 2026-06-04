@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ContactRequest;
 use App\Services\ContactService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class ContactController extends Controller
 {
@@ -28,10 +29,10 @@ class ContactController extends Controller
                 201 
             );
         } catch (\Exception $e) {
+            Log::error('Client Contact Store Error: ' . $e->getMessage());
             return $this->error(
                 'Failed to send contact message.',
-                500, 
-                $e->getMessage()
+                500
             );
         }
     }

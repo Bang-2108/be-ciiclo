@@ -1,10 +1,11 @@
 <?php
-
 namespace App\Services;
-
 use App\Repositories\ProjectRepository;
 use App\Repositories\ProfileRepository;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ProjectService extends BaseService
 {
@@ -20,6 +21,7 @@ class ProjectService extends BaseService
         $this->profileRepo = $profileRepo;
         $this->storageService = $storageService;
     }
+
     public function getAdminProjects()
     {
         return $this->repository->getAllSorted()->map(function ($project) {
@@ -29,49 +31,74 @@ class ProjectService extends BaseService
             return $project;
         });
     }
+
     public function createProject(array $data, ?UploadedFile $imageFile)
     {
-        $profile = $this->profileRepo->getProfile();
-        $data['profile_id'] = $profile ? $profile->id : 1;
-        if (isset($data['tech_stack'])) {
-            $data['tech_stack'] = array_filter(array_map('trim', explode(',', $data['tech_stack'])));
-        }
-        if ($imageFile && $imageFile->isValid()) {
-            $data['image'] = $this->storageService->upload($imageFile, 'projects');
-        }
-        $project = $this->repository->create($data);
+        $newUploadedPath = null;
 
-        if ($project->image) {
-            $project->image = $this->storageService->url($project->image);
-        }
+        try {
+            return DB::transaction(function () use ($data, $imageFile, &$newUploadedPath) {
+                $profile = $this->profileRepo->getProfile();
+                $data['profile_id'] = $profile ? $profile->id : 1;
 
-        return $project;
+                if ($imageFile && $imageFile->isValid()) {
+                    $newUploadedPath = $this->storageService->upload($imageFile, 'projects');
+                    $data['image'] = $newUploadedPath;
+                }
+
+                $project = $this->repository->create($data);
+
+                if ($project->image) {
+                    $project->image = $this->storageService->url($project->image);
+                }
+
+                return $project;
+            });
+        } catch (Exception $e) {
+            if ($newUploadedPath) {
+                $this->storageService->delete($newUploadedPath);
+            }
+
+            Log::error('Create Project Failed: ' . $e->getMessage());
+            throw $e;
+        }
     }
+
     public function updateProject(int $id, array $data, ?UploadedFile $imageFile)
     {
         $project = $this->repository->find($id);
         $rawOldImage = $project ? $project->getRawOriginal('image') : null;
+        $newUploadedPath = null;
 
-        if (isset($data['tech_stack'])) {
-            $data['tech_stack'] = array_filter(array_map('trim', explode(',', $data['tech_stack'])));
-        }
+        try {
+            return DB::transaction(function () use ($id, $data, $imageFile, $rawOldImage, &$newUploadedPath) {
+                if ($imageFile && $imageFile->isValid()) {
+                    $newUploadedPath = $this->storageService->upload($imageFile, 'projects');
+                    $data['image'] = $newUploadedPath;
+                } else {
+                    unset($data['image']);
+                }
 
-        if ($imageFile && $imageFile->isValid()) {
-            if (!empty($rawOldImage)) {
-                $this->storageService->delete($rawOldImage);
+                $updatedProject = $this->repository->update($id, $data);
+
+                if ($newUploadedPath && !empty($rawOldImage)) {
+                    $this->storageService->delete($rawOldImage);
+                }
+
+                if ($updatedProject && $updatedProject->image) {
+                    $updatedProject->image = $this->storageService->url($updatedProject->image);
+                }
+
+                return $updatedProject;
+            });
+        } catch (Exception $e) {
+            if ($newUploadedPath) {
+                $this->storageService->delete($newUploadedPath);
             }
-            $data['image'] = $this->storageService->upload($imageFile, 'projects');
-        } else {
-            unset($data['image']);
+
+            Log::error("Update Project ID {$id} Failed: " . $e->getMessage());
+            throw $e;
         }
-
-        $updatedProject = $this->repository->update($id, $data);
-
-        if ($updatedProject && $updatedProject->image) {
-            $updatedProject->image = $this->storageService->url($updatedProject->image);
-        }
-
-        return $updatedProject;
     }
 
     public function deleteProject(int $id)
@@ -79,10 +106,19 @@ class ProjectService extends BaseService
         $project = $this->repository->find($id);
         $rawImage = $project ? $project->getRawOriginal('image') : null;
 
-        if (!empty($rawImage)) {
-            $this->storageService->delete($rawImage);
-        }
+        try {
+            DB::transaction(function () use ($id) {
+                $this->repository->delete($id);
+            });
 
-        return $this->repository->delete($id);
+            if (!empty($rawImage)) {
+                $this->storageService->delete($rawImage);
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::error("Delete Project ID {$id} Failed: " . $e->getMessage());
+            throw $e;
+        }
     }
 }
